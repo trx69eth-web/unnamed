@@ -1,4 +1,4 @@
--- (travtzx)
+-- tzx
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -6181,7 +6181,7 @@ function Library:CreateWindow(...)
 	});
 
 	local TabListLayout = Library:Create('UIListLayout', {
-		Padding = UDim.new(0, 0);
+		Padding = UDim.new(0, WindowInfo.TabPadding);
 		FillDirection = Enum.FillDirection.Horizontal;
 		SortOrder = Enum.SortOrder.LayoutOrder;
 		VerticalAlignment = Enum.VerticalAlignment.Center;
