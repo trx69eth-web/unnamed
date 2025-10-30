@@ -1,4 +1,4 @@
--- tzx
+-- (Your original script with the modification)
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -6185,7 +6185,6 @@ function Library:CreateWindow(...)
 		FillDirection = Enum.FillDirection.Horizontal;
 		SortOrder = Enum.SortOrder.LayoutOrder;
 		VerticalAlignment = Enum.VerticalAlignment.Center;
-		HorizontalAlignment = Enum.HorizontalAlignment.Center;
 		Parent = TabArea;
 	});
 
@@ -6278,8 +6277,7 @@ function Library:CreateWindow(...)
 		local TabButtonLabel = Library:CreateLabel({
 			Position = UDim2.new(0, 0, 0, 0);
 			Size = UDim2.new(1, 0, 1, -1);
-			Text = Name;
-			TextXAlignment = Enum.TextXAlignment.Center;
+			Text = Tab.Name;
 			ZIndex = 1;
 			Parent = TabButton;
 		});
@@ -6642,7 +6640,7 @@ function Library:CreateWindow(...)
 				Position = UDim2.new(0, 4, 0, 2);
 				TextSize = 14;
 				Text = Info.Name;
-				TextXAlignment = Enum.TextXAlignment.Left;
+				TextXAlignment = Enum.TextXAlignment.Center;  -- Changed from Left to Center
 				ZIndex = 5;
 				Parent = BoxInner;
 			});
