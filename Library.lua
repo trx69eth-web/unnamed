@@ -1,5 +1,4 @@
 -- (Your original script with the modification)
-
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
 local TextService: TextService = cloneref(game:GetService("TextService"));
@@ -6277,7 +6276,8 @@ function Library:CreateWindow(...)
         local TabButtonLabel = Library:CreateLabel({
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
-            Text = Tab.Name;
+            Text = Name;
+            TextXAlignment = Enum.TextXAlignment.Center;
             ZIndex = 1;
             Parent = TabButton;
         });
