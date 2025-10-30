@@ -4005,6 +4005,7 @@ do
 			Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and 'DisabledOutlineColor' or 'AccentColorDark';
 		end;
 
+
 		function Slider:Display()
 			local CustomDisplayText = nil;
 			if Info.FormatDisplayValue then
@@ -4022,9 +4023,7 @@ do
 					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix);
 
 				else
-					DisplayLabel.Text = string.format("%s%s%s/%s%s%s", 
-						Slider.Prefix, FormattedValue, Slider.Suffix,
-						Slider.Prefix, tostring(Slider.Max), Slider.Suffix);
+					DisplayLabel.Text = string.format("%s%s%s / %s%s", Slider.Prefix, FormattedValue, Slider.Suffix, tostring(Slider.Max), Slider.Suffix);
 				end;
 			end;
 
