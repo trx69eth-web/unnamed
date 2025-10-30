@@ -1,4 +1,4 @@
--- (Your original script wtttttith the modification)
+-- tzx
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
