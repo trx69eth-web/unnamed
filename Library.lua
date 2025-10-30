@@ -1,4 +1,4 @@
--- (Your original script with the modification)
+-- (Your original script wtttttith the modification)
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -4005,6 +4005,7 @@ do
 			Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and 'DisabledOutlineColor' or 'AccentColorDark';
 		end;
 
+		-- Fixed part for slider display (in AddSlider function, Slider:Display()):
 
 		function Slider:Display()
 			local CustomDisplayText = nil;
@@ -4023,7 +4024,7 @@ do
 					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix);
 
 				else
-					DisplayLabel.Text = string.format("%s%s%s / %s%s", Slider.Prefix, FormattedValue, Slider.Suffix, tostring(Slider.Max), Slider.Suffix);
+					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix);  -- Show only current value with prefix/suffix, no max
 				end;
 			end;
 
