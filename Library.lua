@@ -1,4 +1,4 @@
--- (travtzx) v1.2.2
+-- (travtzx) v1.2.4
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -3870,35 +3870,29 @@ do
 		local hideLabel = typeof(Info.HideLabel) == "boolean" and Info.HideLabel or false
 		local sliderText = ""
 		if not hideLabel then
-			assert(typeof(Info.Text) == "string", string.format('AddSlider (IDX: %s): Text must be a string.', tostring(Idx)))
-			sliderText = Info.Text ~= "" and Info.Text or "Label" -- fallback if empty
+			assert(typeof(Info.Text) == "string", "Text must be string when HideLabel = false")
+			sliderText = Info.Text ~= "" and Info.Text or "Label"
 		end
 		local Slider = {
 			Value = Info.Default;
-			Min = Info.Min;
-			Max = Info.Max;
-			Rounding = Info.Rounding;
-			MaxSize = 232;
-			Type = 'Slider';
+			Min = Info.Min; Max = Info.Max; Rounding = Info.Rounding;
+			MaxSize = 232; Type = 'Slider';
 			Visible  = typeof(Info.Visible)  == "boolean" and Info.Visible  or true;
 			Disabled = typeof(Info.Disabled) == "boolean" and Info.Disabled or false;
-
 			OriginalText = sliderText;
 			Text = sliderText;
-			HideLabel = hideLabel; 
-
+			HideLabel = hideLabel;
 			Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
 			Suffix = typeof(Info.Suffix) == "string" and Info.Suffix or "";
 
 			Callback = Info.Callback or function() end;
 		};
-
+		
 		local Blanks = {};
 		local SliderText = nil;
 		local Groupbox = self;
 		local Container = Groupbox.Container;
 		local Tooltip;
-
 		if not Info.Compact then
 			SliderText = Library:CreateLabel({
 				Size = UDim2.new(1, 0, 0, 10);
