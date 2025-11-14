@@ -1,4 +1,4 @@
--- (travtzx) v1.2
+-- (travtzx) v1.2.1
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -3878,7 +3878,6 @@ do
 			Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
 			Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
 			OriginalText = sliderText;
-			Text = sliderText;
 			Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
 			Suffix = typeof(Info.Suffix) == "string" and Info.Suffix or "";
 
