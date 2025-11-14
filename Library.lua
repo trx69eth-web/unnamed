@@ -3863,15 +3863,13 @@ do
 	end;
 
 	function BaseGroupboxFuncs:AddSlider(Idx, Info)
-		assert(Info.Default,    string.format('AddSlider (IDX: %s): Missing default value.', tostring(Idx)));
-		assert(Info.Text,       string.format('AddSlider (IDX: %s): Missing slider text.', tostring(Idx)));
-		assert(Info.Min,        string.format('AddSlider (IDX: %s): Missing minimum value.', tostring(Idx)));
-		assert(Info.Max,        string.format('AddSlider (IDX: %s): Missing maximum value.', tostring(Idx)));
-		assert(Info.Rounding,   string.format('AddSlider (IDX: %s): Missing rounding value.', tostring(Idx)));
-
+		assert(Info.Default,  string.format('AddSlider (IDX: %s): Missing default value.', tostring(Idx)))
+		assert(Info.Min,      string.format('AddSlider (IDX: %s): Missing minimum value.', tostring(Idx)))
+		assert(Info.Max,      string.format('AddSlider (IDX: %s): Missing maximum value.', tostring(Idx)))
+		assert(Info.Rounding, string.format('AddSlider (IDX: %s): Missing rounding value.', tostring(Idx)))
+		local sliderText = (typeof(Info.Text) == "string" and Info.Text ~= "") and Info.Text or ""
 		local Slider = {
 			Value = Info.Default;
-
 			Min = Info.Min;
 			Max = Info.Max;
 			Rounding = Info.Rounding;
@@ -3879,8 +3877,8 @@ do
 			Type = 'Slider';
 			Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
 			Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
-			OriginalText = Info.Text; Text = Info.Text;
-
+			OriginalText = sliderText;
+			Text = sliderText;
 			Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
 			Suffix = typeof(Info.Suffix) == "string" and Info.Suffix or "";
 
