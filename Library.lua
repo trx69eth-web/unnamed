@@ -1,4 +1,4 @@
--- (travtzx) v1.1
+-- (travtzx) v1.2
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
