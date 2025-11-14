@@ -1,4 +1,4 @@
--- (travtzx) v1.2.1
+-- (travtzx) v1.2.2
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -3863,11 +3863,16 @@ do
 	end;
 
 	function BaseGroupboxFuncs:AddSlider(Idx, Info)
-		assert(Info.Default,  string.format('AddSlider (IDX: %s): Missing default value.', tostring(Idx)))
+		assert(Info.Default,  string.format('AddSlider (IDX: %s): Missing default value.',  tostring(Idx)))
 		assert(Info.Min,      string.format('AddSlider (IDX: %s): Missing minimum value.', tostring(Idx)))
 		assert(Info.Max,      string.format('AddSlider (IDX: %s): Missing maximum value.', tostring(Idx)))
 		assert(Info.Rounding, string.format('AddSlider (IDX: %s): Missing rounding value.', tostring(Idx)))
-		local sliderText = (typeof(Info.Text) == "string" and Info.Text ~= "") and Info.Text or ""
+		local hideLabel = typeof(Info.HideLabel) == "boolean" and Info.HideLabel or false
+		local sliderText = ""
+		if not hideLabel then
+			assert(typeof(Info.Text) == "string", string.format('AddSlider (IDX: %s): Text must be a string.', tostring(Idx)))
+			sliderText = Info.Text ~= "" and Info.Text or "Label" -- fallback if empty
+		end
 		local Slider = {
 			Value = Info.Default;
 			Min = Info.Min;
@@ -3875,13 +3880,17 @@ do
 			Rounding = Info.Rounding;
 			MaxSize = 232;
 			Type = 'Slider';
-			Visible = if typeof(Info.Visible) == "boolean" then Info.Visible else true;
-			Disabled = if typeof(Info.Disabled) == "boolean" then Info.Disabled else false;
+			Visible  = typeof(Info.Visible)  == "boolean" and Info.Visible  or true;
+			Disabled = typeof(Info.Disabled) == "boolean" and Info.Disabled or false;
+
 			OriginalText = sliderText;
+			Text = sliderText;
+			HideLabel = hideLabel; 
+
 			Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
 			Suffix = typeof(Info.Suffix) == "string" and Info.Suffix or "";
 
-			Callback = Info.Callback or function(Value) end;
+			Callback = Info.Callback or function() end;
 		};
 
 		local Blanks = {};
