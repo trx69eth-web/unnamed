@@ -1,4 +1,4 @@
--- (travtzx) v1.2.5
+-- (travtzx) v1.2.6
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -3898,14 +3898,14 @@ do
 			Callback = Info.Callback or function() end;
 		};
 
-		-- === UI ELEMENTS ===
-		local Blanks = {}
+		-- === DECLARE BLANKS FIRST! ===
+		local Blanks = {}  -- Fixed: Moved UP
 		local SliderText = nil
 		local Groupbox = self
 		local Container = Groupbox.Container
 		local Tooltip
 
-		-- ONLY CREATE LABEL IF NOT HIDDEN AND NOT COMPACT
+		-- === CREATE LABEL ONLY IF NEEDED ===
 		if not hideLabel and not Info.Compact then
 			SliderText = Library:CreateLabel({
 				Size = UDim2.new(1, 0, 0, 10);
@@ -3918,7 +3918,7 @@ do
 				Parent = Container;
 				RichText = true;
 			})
-			table.insert(Blanks, Groupbox:AddBlank(3, Slider.Visible))
+			table.insert(Blanks, Groupbox:AddBlank(3, Slider.Visible))  -- Now safe
 		end
 
 		-- === SLIDER BAR ===
@@ -3975,7 +3975,7 @@ do
 
 		Library:AddToRegistry(HideBorderRight, { BackgroundColor3 = 'AccentColor' })
 
-		-- === VALUE DISPLAY (CENTERED ON BAR) ===
+		-- === VALUE DISPLAY ===
 		local DisplayLabel = Library:CreateLabel({
 			Size = UDim2.new(1, 0, 1, 0);
 			TextSize = 14;
@@ -4011,17 +4011,15 @@ do
 			Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and 'DisabledOutlineColor' or 'AccentColorDark'
 		end
 
-		-- === DISPLAY LOGIC: NO PLACEHOLDER EVER ===
+		-- === DISPLAY: NO PLACEHOLDER ===
 		function Slider:Display()
 			local CustomDisplayText = Info.FormatDisplayValue and Info.FormatDisplayValue(Slider, Slider.Value)
-
 			local FormattedValue = (Slider.Value == 0 or Slider.Value == -0) and "0" or tostring(Slider.Value)
 
 			if CustomDisplayText then
 				DisplayLabel.Text = tostring(CustomDisplayText)
 			else
 				if Slider.HideLabel then
-					-- CLEAN: Only value + prefix + suffix
 					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix)
 				elseif Info.Compact then
 					DisplayLabel.Text = string.format("%s: %s%s%s", Slider.Text, Slider.Prefix, FormattedValue, Slider.Suffix)
@@ -4035,7 +4033,7 @@ do
 			HideBorderRight.Visible = not (X == 1 or X == 0)
 		end
 
-		-- === INPUT HANDLING ===
+		-- === INPUT ===
 		SliderInner.InputBegan:Connect(function(Input)
 			if Slider.Disabled or (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch) or Library:MouseIsOverOpenedFrame() then return end
 
@@ -4101,8 +4099,11 @@ do
 		-- === FINALIZE ===
 		task.delay(0.1, Slider.UpdateColors, Slider)
 		Slider:Display()
+
+		-- Final blank (always added)
 		table.insert(Blanks, Groupbox:AddBlank(Info.BlankSize or 6, Slider.Visible))
 		Groupbox:Resize()
+
 		Slider.Default = Slider.Value
 		Options[Idx] = Slider
 		table.insert(self.Components, Slider)
