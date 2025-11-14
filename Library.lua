@@ -1,4 +1,4 @@
--- (travtzx) v1.2.4
+-- (travtzx) v1.2.5
 
 local cloneref = (cloneref or clonereference or function(instance: any) return instance end)
 local InputService: UserInputService = cloneref(game:GetService("UserInputService"));
@@ -3867,48 +3867,61 @@ do
 		assert(Info.Min,      string.format('AddSlider (IDX: %s): Missing minimum value.', tostring(Idx)))
 		assert(Info.Max,      string.format('AddSlider (IDX: %s): Missing maximum value.', tostring(Idx)))
 		assert(Info.Rounding, string.format('AddSlider (IDX: %s): Missing rounding value.', tostring(Idx)))
+
+		-- === HIDE LABEL LOGIC ===
 		local hideLabel = typeof(Info.HideLabel) == "boolean" and Info.HideLabel or false
 		local sliderText = ""
+
 		if not hideLabel then
-			assert(typeof(Info.Text) == "string", "Text must be string when HideLabel = false")
+			assert(typeof(Info.Text) == "string", string.format('AddSlider (IDX: %s): Text must be a string when HideLabel = false.', tostring(Idx)))
 			sliderText = Info.Text ~= "" and Info.Text or "Label"
 		end
+
+		-- === SLIDER OBJECT ===
 		local Slider = {
 			Value = Info.Default;
-			Min = Info.Min; Max = Info.Max; Rounding = Info.Rounding;
-			MaxSize = 232; Type = 'Slider';
-			Visible  = typeof(Info.Visible)  == "boolean" and Info.Visible  or true;
+			Min = Info.Min;
+			Max = Info.Max;
+			Rounding = Info.Rounding;
+			MaxSize = 232;
+			Type = 'Slider';
+			Visible = typeof(Info.Visible) == "boolean" and Info.Visible or true;
 			Disabled = typeof(Info.Disabled) == "boolean" and Info.Disabled or false;
+
 			OriginalText = sliderText;
 			Text = sliderText;
 			HideLabel = hideLabel;
+
 			Prefix = typeof(Info.Prefix) == "string" and Info.Prefix or "";
 			Suffix = typeof(Info.Suffix) == "string" and Info.Suffix or "";
 
 			Callback = Info.Callback or function() end;
 		};
-		
-		local Blanks = {};
-		local SliderText = nil;
-		local Groupbox = self;
-		local Container = Groupbox.Container;
-		local Tooltip;
-		if not Info.Compact then
+
+		-- === UI ELEMENTS ===
+		local Blanks = {}
+		local SliderText = nil
+		local Groupbox = self
+		local Container = Groupbox.Container
+		local Tooltip
+
+		-- ONLY CREATE LABEL IF NOT HIDDEN AND NOT COMPACT
+		if not hideLabel and not Info.Compact then
 			SliderText = Library:CreateLabel({
 				Size = UDim2.new(1, 0, 0, 10);
 				TextSize = 14;
-				Text = Info.Text;
+				Text = sliderText;
 				TextXAlignment = Enum.TextXAlignment.Left;
 				TextYAlignment = Enum.TextYAlignment.Bottom;
 				Visible = Slider.Visible;
 				ZIndex = 5;
 				Parent = Container;
 				RichText = true;
-			});
-
-			table.insert(Blanks, Groupbox:AddBlank(3, Slider.Visible));
+			})
+			table.insert(Blanks, Groupbox:AddBlank(3, Slider.Visible))
 		end
 
+		-- === SLIDER BAR ===
 		local SliderOuter = Library:Create('Frame', {
 			BackgroundColor3 = Color3.new(0, 0, 0);
 			BorderColor3 = Color3.new(0, 0, 0);
@@ -3916,15 +3929,13 @@ do
 			Visible = Slider.Visible;
 			ZIndex = 5;
 			Parent = Container;
-		});
+		})
 
 		SliderOuter:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
-			Slider.MaxSize = SliderOuter.AbsoluteSize.X - 2;
-		end);
+			Slider.MaxSize = SliderOuter.AbsoluteSize.X - 2
+		end)
 
-		Library:AddToRegistry(SliderOuter, {
-			BorderColor3 = 'Black';
-		});
+		Library:AddToRegistry(SliderOuter, { BorderColor3 = 'Black' })
 
 		local SliderInner = Library:Create('Frame', {
 			BackgroundColor3 = Library.MainColor;
@@ -3933,12 +3944,12 @@ do
 			Size = UDim2.new(1, 0, 1, 0);
 			ZIndex = 6;
 			Parent = SliderOuter;
-		});
+		})
 
 		Library:AddToRegistry(SliderInner, {
 			BackgroundColor3 = 'MainColor';
 			BorderColor3 = 'OutlineColor';
-		});
+		})
 
 		local Fill = Library:Create('Frame', {
 			BackgroundColor3 = Library.AccentColor;
@@ -3946,12 +3957,12 @@ do
 			Size = UDim2.new(0, 0, 1, 0);
 			ZIndex = 7;
 			Parent = SliderInner;
-		});
+		})
 
 		Library:AddToRegistry(Fill, {
 			BackgroundColor3 = 'AccentColor';
 			BorderColor3 = 'AccentColorDark';
-		});
+		})
 
 		local HideBorderRight = Library:Create('Frame', {
 			BackgroundColor3 = Library.AccentColor;
@@ -3960,260 +3971,144 @@ do
 			Size = UDim2.new(0, 1, 1, 0);
 			ZIndex = 8;
 			Parent = Fill;
-		});
+		})
 
-		Library:AddToRegistry(HideBorderRight, {
-			BackgroundColor3 = 'AccentColor';
-		});
+		Library:AddToRegistry(HideBorderRight, { BackgroundColor3 = 'AccentColor' })
 
+		-- === VALUE DISPLAY (CENTERED ON BAR) ===
 		local DisplayLabel = Library:CreateLabel({
 			Size = UDim2.new(1, 0, 1, 0);
 			TextSize = 14;
-			Text = 'Infinite';
+			Text = '0';
 			ZIndex = 9;
 			Parent = SliderInner;
 			RichText = true;
-		});
+		})
 
+		-- === HIGHLIGHT & TOOLTIP ===
 		Library:OnHighlight(SliderOuter, SliderOuter,
 			{ BorderColor3 = 'AccentColor' },
 			{ BorderColor3 = 'Black' },
-			function()
-				return not Slider.Disabled;
-			end
-		);
+			function() return not Slider.Disabled end
+		)
 
 		if typeof(Info.Tooltip) == "string" or typeof(Info.DisabledTooltip) == "string" then
 			Tooltip = Library:AddToolTip(Info.Tooltip, Info.DisabledTooltip, SliderOuter)
-			Tooltip.Disabled = Slider.Disabled;
+			Tooltip.Disabled = Slider.Disabled
 		end
 
+		-- === UPDATE COLORS ===
 		function Slider:UpdateColors()
 			if SliderText then
-				SliderText.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1);
-			end;
-			DisplayLabel.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1);
+				SliderText.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+			end
+			DisplayLabel.TextColor3 = Slider.Disabled and Library.DisabledAccentColor or Color3.new(1, 1, 1)
+			HideBorderRight.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor
+			Fill.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor
+			Fill.BorderColor3 = Slider.Disabled and Library.DisabledOutlineColor or Library.AccentColorDark
+			Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = Slider.Disabled and 'DisabledAccentColor' or 'AccentColor'
+			Library.RegistryMap[Fill].Properties.BackgroundColor3 = Slider.Disabled and 'DisabledAccentColor' or 'AccentColor'
+			Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and 'DisabledOutlineColor' or 'AccentColorDark'
+		end
 
-			HideBorderRight.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor;
-
-			Fill.BackgroundColor3 = Slider.Disabled and Library.DisabledAccentColor or Library.AccentColor;
-			Fill.BorderColor3 = Slider.Disabled and Library.DisabledOutlineColor or Library.AccentColorDark;
-
-			Library.RegistryMap[HideBorderRight].Properties.BackgroundColor3 = Slider.Disabled and 'DisabledAccentColor' or 'AccentColor';
-
-			Library.RegistryMap[Fill].Properties.BackgroundColor3 = Slider.Disabled and 'DisabledAccentColor' or 'AccentColor';
-			Library.RegistryMap[Fill].Properties.BorderColor3 = Slider.Disabled and 'DisabledOutlineColor' or 'AccentColorDark';
-		end;
-
-		-- Fixed part for slider display (in AddSlider function, Slider:Display()):
-
+		-- === DISPLAY LOGIC: NO PLACEHOLDER EVER ===
 		function Slider:Display()
-			local CustomDisplayText = nil;
-			if Info.FormatDisplayValue then
-				CustomDisplayText = Info.FormatDisplayValue(Slider, Slider.Value);
-			end;
+			local CustomDisplayText = Info.FormatDisplayValue and Info.FormatDisplayValue(Slider, Slider.Value)
+
+			local FormattedValue = (Slider.Value == 0 or Slider.Value == -0) and "0" or tostring(Slider.Value)
 
 			if CustomDisplayText then
-				DisplayLabel.Text = tostring(CustomDisplayText);
+				DisplayLabel.Text = tostring(CustomDisplayText)
 			else
-				local FormattedValue = (Slider.Value == 0 or Slider.Value == -0) and "0" or tostring(Slider.Value);
-				if Info.Compact then
-					DisplayLabel.Text = string.format("%s: %s%s%s", Slider.Text, Slider.Prefix, FormattedValue, Slider.Suffix);
-
-				elseif Info.HideMax then
-					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix);
-
+				if Slider.HideLabel then
+					-- CLEAN: Only value + prefix + suffix
+					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix)
+				elseif Info.Compact then
+					DisplayLabel.Text = string.format("%s: %s%s%s", Slider.Text, Slider.Prefix, FormattedValue, Slider.Suffix)
 				else
-					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix);  -- Show only current value with prefix/suffix, no max
-				end;
-			end;
-
-			local X = Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, 1);
-			Fill.Size = UDim2.new(X, 0, 1, 0);
-
-			-- I have no idea what this is
-			HideBorderRight.Visible = not (X == 1 or X == 0);
-		end;
-
-		function Slider:OnChanged(Func)
-			Slider.Changed = Func;
-
-			-- if Slider.Disabled then
-			--     return;
-			-- end;
-
-			-- Library:SafeCallback(Func, Slider.Value);
-		end;
-
-		local function Round(Value)
-			if Slider.Rounding == 0 then
-				return math.floor(Value);
-			end;
-
-			return tonumber(string.format('%.' .. Slider.Rounding .. 'f', Value))
-		end;
-
-		function Slider:GetValueFromXScale(X)
-			return Round(Library:MapValue(X, 0, 1, Slider.Min, Slider.Max));
-		end;
-
-		function Slider:SetMax(Value)
-			assert(Value > Slider.Min, 'Max value cannot be less than the current min value.');
-
-			Slider.Value = math.clamp(Slider.Value, Slider.Min, Value);
-			Slider.Max = Value;
-			Slider:Display();
-		end;
-
-		function Slider:SetMin(Value)
-			assert(Value < Slider.Max, 'Min value cannot be greater than the current max value.');
-
-			Slider.Value = math.clamp(Slider.Value, Value, Slider.Max);
-			Slider.Min = Value;
-			Slider:Display();
-		end;
-
-		function Slider:SetValue(Str)
-			if Slider.Disabled then
-				return;
-			end;
-
-			local Num = tonumber(Str);
-
-			if (not Num) then
-				return;
-			end;
-
-			Num = math.clamp(Num, Slider.Min, Slider.Max);
-
-			Slider.Value = Num;
-			Slider:Display();
-
-			if not Slider.Disabled then
-				Library:SafeCallback(Slider.Callback, Slider.Value);
-				Library:SafeCallback(Slider.Changed, Slider.Value);
-			end;
-		end;
-
-		function Slider:SetVisible(Visibility)
-			Slider.Visible = Visibility;
-
-			if SliderText then SliderText.Visible = Slider.Visible end;
-			SliderOuter.Visible = Slider.Visible;
-
-			for _, Blank in pairs(Blanks) do
-				Blank.Visible = Slider.Visible
+					DisplayLabel.Text = string.format("%s%s%s", Slider.Prefix, FormattedValue, Slider.Suffix)
+				end
 			end
 
-			Groupbox:Resize();
-		end;
+			local X = Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, 1)
+			Fill.Size = UDim2.new(X, 0, 1, 0)
+			HideBorderRight.Visible = not (X == 1 or X == 0)
+		end
 
-		function Slider:SetDisabled(Disabled)
-			Slider.Disabled = Disabled;
-
-			if Tooltip then
-				Tooltip.Disabled = Disabled;
-			end
-
-			Slider:UpdateColors();
-		end;
-
-		function Slider:SetText(Text)
-			if typeof(Text) == "string" then
-				Slider.Text = Text;
-
-				if SliderText then SliderText.Text = Slider.Text end;
-				Slider:Display();
-			end
-		end;
-
-		function Slider:SetPrefix(Prefix)
-			if typeof(Prefix) == "string" then
-				Slider.Prefix = Prefix;
-				Slider:Display();
-			end
-		end;
-
-		function Slider:SetSuffix(Suffix)
-			if typeof(Suffix) == "string" then
-				Slider.Suffix = Suffix;
-				Slider:Display();
-			end
-		end;
-
+		-- === INPUT HANDLING ===
 		SliderInner.InputBegan:Connect(function(Input)
-			if Slider.Disabled then
-				return;
-			end;
+			if Slider.Disabled or (Input.UserInputType ~= Enum.UserInputType.MouseButton1 and Input.UserInputType ~= Enum.UserInputType.Touch) or Library:MouseIsOverOpenedFrame() then return end
 
-			if (Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame()) or Input.UserInputType == Enum.UserInputType.Touch then
-				if Library.IsMobile then
-					Library.CanDrag = false;
-				end;
+			local mPos = Mouse.X
+			local gPos = Fill.AbsoluteSize.X
+			local Diff = mPos - (Fill.AbsolutePosition.X + gPos)
 
-				local Sides = {};
-				if Library.Window then
-					Sides = Library.Window.Tabs[Library.ActiveTab]:GetSides();
+			while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+				local nMPos = Mouse.X
+				local nXOffset = math.clamp(gPos + (nMPos - mPos) + Diff, 0, Slider.MaxSize)
+				local nXScale = Library:MapValue(nXOffset, 0, Slider.MaxSize, 0, 1)
+				local nValue = Slider:GetValueFromXScale(nXScale)
+				local OldValue = Slider.Value
+
+				Slider.Value = nValue
+				Slider:Display()
+
+				if nValue ~= OldValue then
+					Library:SafeCallback(Slider.Callback, Slider.Value)
+					Library:SafeCallback(Slider.Changed, Slider.Value)
 				end
 
-				for _, Side in pairs(Sides) do
-					if typeof(Side) == "Instance" then
-						if Side:IsA("ScrollingFrame") then
-							Side.ScrollingEnabled = false;
-						end
-					end
-				end;
+				RunService.RenderStepped:Wait()
+			end
 
-				local mPos = Mouse.X;
-				local gPos = Fill.AbsoluteSize.X;
-				local Diff = mPos - (Fill.AbsolutePosition.X + gPos);
+			Library:AttemptSave()
+		end)
 
-				while InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1 or Enum.UserInputType.Touch) do
-					local nMPos = Mouse.X;
-					local nXOffset = math.clamp(gPos + (nMPos - mPos) + Diff, 0, Slider.MaxSize); -- what in tarnation are these variable names
-					local nXScale = Library:MapValue(nXOffset, 0, Slider.MaxSize, 0, 1);
+		-- === SETTERS ===
+		function Slider:SetValue(v)
+			if Slider.Disabled then return end
+			local num = tonumber(v)
+			if not num then return end
+			Slider.Value = math.clamp(num, Slider.Min, Slider.Max)
+			Slider:Display()
+			Library:SafeCallback(Slider.Callback, Slider.Value)
+			Library:SafeCallback(Slider.Changed, Slider.Value)
+		end
 
-					local nValue = Slider:GetValueFromXScale(nXScale);
-					local OldValue = Slider.Value;
-					Slider.Value = nValue;
+		function Slider:SetText(text)
+			if typeof(text) == "string" and not Slider.HideLabel then
+				Slider.Text = text
+				Slider.OriginalText = text
+				if SliderText then SliderText.Text = text end
+				Slider:Display()
+			end
+		end
 
-					Slider:Display();
+		function Slider:SetVisible(v)
+			Slider.Visible = v
+			if SliderText then SliderText.Visible = v end
+			SliderOuter.Visible = v
+			for _, b in pairs(Blanks) do b.Visible = v end
+			Groupbox:Resize()
+		end
 
-					if nValue ~= OldValue then
-						Library:SafeCallback(Slider.Callback, Slider.Value);
-						Library:SafeCallback(Slider.Changed, Slider.Value);
-					end;
+		function Slider:SetDisabled(d)
+			Slider.Disabled = d
+			if Tooltip then Tooltip.Disabled = d end
+			Slider:UpdateColors()
+		end
 
-					RunService.RenderStepped:Wait();
-				end;
+		-- === FINALIZE ===
+		task.delay(0.1, Slider.UpdateColors, Slider)
+		Slider:Display()
+		table.insert(Blanks, Groupbox:AddBlank(Info.BlankSize or 6, Slider.Visible))
+		Groupbox:Resize()
+		Slider.Default = Slider.Value
+		Options[Idx] = Slider
+		table.insert(self.Components, Slider)
 
-				if Library.IsMobile then
-					Library.CanDrag = true;
-				end;
-
-				for _, Side in pairs(Sides) do
-					if typeof(Side) == "Instance" then
-						if Side:IsA("ScrollingFrame") then
-							Side.ScrollingEnabled = true;
-						end
-					end;
-				end;
-
-				Library:AttemptSave();
-			end;
-		end);
-
-		task.delay(0.1, Slider.UpdateColors, Slider);
-		Slider:Display();
-		table.insert(Blanks, Groupbox:AddBlank(Info.BlankSize or 6, Slider.Visible));
-		Groupbox:Resize();
-
-		Slider.Default = Slider.Value;
-
-		Options[Idx] = Slider;
-
-		return Slider;
-	end;
+		return Slider
+	end
 
 	function BaseGroupboxFuncs:AddDropdown(Idx, Info)
 		Info.ReturnInstanceInstead = if typeof(Info.ReturnInstanceInstead) == "boolean" then Info.ReturnInstanceInstead else false;
